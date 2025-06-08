@@ -10,6 +10,8 @@ describe('Testes da tabela usuarios', () => {
         // Usa a versão com Promises 
         const [results] = await db.promise().query('SELECT * FROM usuarios');
 
+        // Exibe os usuários no console
+        console.log('Usuários encontrados no banco:', results);
 
         // Verifica que é um array e que contém pelo menos um usuário
         assert.ok(Array.isArray(results));
