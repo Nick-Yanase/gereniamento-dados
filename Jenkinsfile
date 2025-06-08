@@ -12,29 +12,27 @@ pipeline {
         }
 
 
-        stage('Configurar Banco de Dados') {
+      stage('Configurar Banco de Dados') {
     steps {
-        script {
-            def mysqlUser = env.DB_USER
-            def mysqlPassword = env.DB_PASSWORD
-            def mysqlHost = env.DB_HOST
-            def mysqlDb = env.DB_NAME
+            script {
+                def mysqlUser = env.DB_USER
+                def mysqlPassword = env.DB_PASSWORD
+                def mysqlHost = env.DB_HOST
+                def mysqlDb = env.DB_NAME
 
-            // Comando para verificar se o banco já existe
-            def checkDbCommand = "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} -e \"SHOW DATABASES LIKE '${mysqlDb}';\""
+                def checkDbCommand = "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} -N -B -e \"SHOW DATABASES LIKE '${mysqlDb}';\""
+                def output = bat(script: checkDbCommand, returnStdout: true).trim()
 
-            // Executa o comando e captura a saída
-            def result = bat(script: checkDbCommand, returnStatus: true)
-
-            if (result == 0) {
-                echo "Banco de dados '${mysqlDb}' já existe. Pulando criação..."
-            } else {
-                echo "Banco de dados '${mysqlDb}' não encontrado. Executando script de criação..."
-                bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} < sql/init.sql"
+                if (output == "${mysqlDb}") {
+                    echo "Banco de dados '${mysqlDb}' já existe. Pulando criação..."
+                } else {
+                    echo "Banco de dados '${mysqlDb}' não encontrado. Criando agora..."
+                    bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} < sql/init.sql"
+                }
             }
         }
     }
-}
+
 
 
         stage('Executar Testes') {
