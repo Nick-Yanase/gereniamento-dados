@@ -13,19 +13,28 @@ pipeline {
 
 
         stage('Configurar Banco de Dados') {
-            steps {
-                script {
-                    // Acessa as variáveis de ambiente diretamente
-                    def mysqlUser = env.DB_USER
-                    def mysqlPassword = env.DB_PASSWORD
-                    def mysqlHost = env.DB_HOST
+    steps {
+        script {
+            def mysqlUser = env.DB_USER
+            def mysqlPassword = env.DB_PASSWORD
+            def mysqlHost = env.DB_HOST
+            def mysqlDb = env.DB_NAME
 
+            // Comando para verificar se o banco já existe
+            def checkDbCommand = "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} -e \"SHOW DATABASES LIKE '${mysqlDb}';\""
 
-                    // Executa o script SQL com as variáveis
-                    bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} --batch < sql/init.sql"
-                }
+            // Executa o comando e captura a saída
+            def result = bat(script: checkDbCommand, returnStatus: true)
+
+            if (result == 0) {
+                echo "Banco de dados '${mysqlDb}' já existe. Pulando criação..."
+            } else {
+                echo "Banco de dados '${mysqlDb}' não encontrado. Executando script de criação..."
+                bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} < sql/init.sql"
             }
         }
+    }
+}
 
 
         stage('Executar Testes') {
