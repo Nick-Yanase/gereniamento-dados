@@ -20,22 +20,14 @@ pipeline {
                 def mysqlHost = env.DB_HOST
                 def mysqlDb = env.DB_NAME
 
-                def checkDbCommand = "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\"
-
-                 -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} -N -B -e
-
-                  \"SHOW DATABASES LIKE '${mysqlDb}';\""
-
+                def checkDbCommand = "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} -N -B -e \"SHOW DATABASES LIKE '${mysqlDb}';\""
                 def output = bat(script: checkDbCommand, returnStdout: true).trim()
 
                 if (output == "${mysqlDb}") {
                     echo "Banco de dados '${mysqlDb}' já existe. Pulando criação..."
                 } else {
                     echo "Banco de dados '${mysqlDb}' não encontrado. Criando agora..."
-
-                    bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\"
-                    
-                     -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} < sql/init.sql"
+                    bat "\"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe\" -u${mysqlUser} -p${mysqlPassword} -h${mysqlHost} < sql/init.sql"
                 }
             }
         }
